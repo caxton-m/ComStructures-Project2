@@ -1,6 +1,8 @@
 // Computing Structures Fall 2022
 // DSA 5005
-// Aditya Narasimhan
+// Project 2
+// Original editor - Aditya Narasimhan
+// Modified by Caxton Muchono
 
 #include <iostream>
 #include <string>
@@ -11,6 +13,7 @@ using namespace std;
 template <class DT>
 class Node
 {
+    friend ostream& operator<< (ostream& s, const Node<DT>& N);
 protected:
     int nodeNumber;  // field to store node's number
     string nodeInfo; // field to store node's information
@@ -18,24 +21,64 @@ protected:
     string location; // field to store the location
 
 public:
-    Node(); // default constructor
+    Node() {  // default constructor
+        nodeNumber = 0;
+        nodeInfo = "";
+        yearCreated = NULL;
+        location = "";
+    } 
 
     // getters
-    string getNodeInfo();
-    int getNodeNumber();
-    DT getYearCreated();
-    string getLocation();
+    string getNodeInfo() {
+        return nodeInfo;
+    }
+    int getNodeNumber() {
+        return nodeNumber;
+    }
+    DT getYearCreated() {
+        return yearCreated;
+    }
+    string getLocation() {
+        return location;
+    }
 
     // setters
-    void setNodeInfo(string newInfo, DT newYearCreated, string newLoc); // V2: updated
-    void setNodeNumber(int newNum);
-    void setYearCreated(DT newYearCreated);
-    void setLocation(string newLocation);
+    void setNodeInfo(string newInfo, DT newYearCreated, string newLoc) {
 
-    void display(); // display node details
+        nodeInfo = newInfo;
+        setYearCreated(newYearCreated);
+        setLocation(newLoc);
 
-    ~Node(); // destructor
+        //yearCreated = newYearCreated;
+        //location = newLoc;
+
+    } // V2: updated
+    void setNodeNumber(int newNum) {
+        nodeNumber = newNum;
+    }
+    void setYearCreated(DT newYearCreated) {
+        yearCreated = newYearCreated;
+    }
+    void setLocation(string newLocation) {
+        location = newLocation;
+    }
+
+    void display() {
+        cout << getNodeNumber() << ": " << getNodeInfo() << ", " << getYearCreated() <<
+            ", " << getLocation() << endl;
+    } // display node details
+
+    ~Node() {} // destructor
 };
+
+template <class DT>
+ostream& operator<<(ostream& s, const Node<DT>& N)
+{
+    
+    s << *(N.nodeNumber) << ": " << *(N.nodeInfo) << ", " << *(N.yearCreated) <<
+        ", " << *(N.location) << endl;
+    return s;
+}
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -50,22 +93,44 @@ protected:
     DT yearsKnown;   // u and v - years known
 
 public:
-    Edge(); // default constructor
+    Edge() { // default constructor
+        u = NULL;
+        v = NULL;
+        edgeInfo = "";
+        yearsKnown = NULL;
+    }
     // getters
-    Node<DT>* getu();
-    Node<DT>* getv();
-    string getEdgeInfo();
-    DT getYearsKnown();
+    Node<DT>* getu() {
+        return u;
+    }
+    Node<DT>* getv() {
+        return v;
+    }
+    string getEdgeInfo() {
+        return edgeInfo;
+    }
+    DT getYearsKnown() {
+        return yearsKnown;
+    }
 
     // setters
-    void setu(Node<DT>* newu);
-    void setv(Node<DT>* newv);
-    void setEdgeInfo(string newInfo, DT newYearsKnown); // V2: updated
-    void setYearsKnown(DT newYear);                     // V2: updated
+    void setu(Node<DT>* newu) {
 
-    void display(); // display edge details
+    }
+    void setv(Node<DT>* newv) {
 
-    ~Edge(); // destructor
+    }
+    void setEdgeInfo(string newInfo, DT newYearsKnown) {
+
+    } // V2: updated
+    void setYearsKnown(DT newYear) {
+
+    }                     // V2: updated
+
+    void display(){ // display edge details
+    }
+
+    ~Edge() {} // destructor
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,26 +148,62 @@ protected:
     int maxEdges;      // store the max number of edges (array size)
 
 public:
-    GraphDB(int nNodes, int nEdges); // non-default constructor
+    GraphDB(int nNodes, int nEdges){ // non-default constructor
+        cout << "non-default constructor called" << endl;
+        numNodes = nNodes;
+        numEdges = 0;  // start numEdge at 0 and increase index as edges increase 
+        maxEdges = nEdges;
+        myNodes = new Node<DT>[nNodes]();
+        myEdges = new Edge<DT>[nEdges]();
+    }
+
     // setters
-    void setNode(Node<DT>& newNode);
-    void setEdge(Edge<DT>& newEdge);
-    void setNodeInfo(int u, string newInfo);
-    void setEdgeInfo(int u, int v, string newInfo);
+    void setNode(Node<DT>& newNode) {
+        // find the node number of newNode and store in nodeNum
+        int nodeNum = newNode.getNodeNumber();
+
+        // set GraphDB node at NodeNum index with the node info
+        myNodes[nodeNum].setNodeNumber(newNode.getNodeNumber());
+        myNodes[nodeNum].setNodeInfo(newNode.getNodeInfo(), newNode.getYearCreated(), newNode.getLocation());
+        
+    }
+    void setEdge(Edge<DT>& newEdge) {
+
+    }
+    void setNodeInfo(int u, string newInfo) {
+
+    }
+    void setEdgeInfo(int u, int v, string newInfo) {
+
+    }
 
     // getters
-    Node<DT>* getNode(int nodeNum);
-    string getNodeInfo(int nodeNum);
-    Edge<DT>* getEdgeInfo(int u, int v);
+    Node<DT>* getNode(int nodeNum) {
+        return &myNodes[nodeNum];
+    }
+    string getNodeInfo(int nodeNum) {
+    }
+    Edge<DT>* getEdgeInfo(int u, int v) {
+    }
 
     // operations
-    bool isAnEdge(int u, int v);     // is this edge existent
-    void addEdge(Edge<DT>& newEdge); // add an edge
-    void deleteEdge(int u, int v);   // delete the edge
-    void display();                  // display the contents of the two arrays
-    int* findNeighbours(int u);      // returns an integer array of neighbours' nodeNum
+    bool isAnEdge(int u, int v){     // is this edge existent
 
-    ~GraphDB(); // destructor
+    }
+    void addEdge(Edge<DT>& newEdge){ // add an edge
+
+    }
+    void deleteEdge(int u, int v){   // delete the edge
+
+    }
+    void display(){                  // display the contents of the two arrays
+
+    }
+    int* findNeighbours(int u){      // returns an integer array of neighbours' nodeNum
+
+    }
+
+    ~GraphDB() {} // destructor
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -112,9 +213,72 @@ int main()
 
     // you can start with the same main function from project 1
     int numNodes, maxEdges;
+    int nodeNum;
+    int nodeYear;
+
+    string nodeInfo;
+    string nodeLocation;
+
+    char input; // command to do something
+
+    Node<int> tempNode; // temp node for node insertion 
+    Edge<int> tempEdge; // temp edge for edge insertion
 
     cin >> numNodes >> maxEdges;
-    cout << numNodes << maxEdges;
+
+    // display the values read in
+    cout << "numNodes: " << numNodes << endl;
+    cout << "maxEdges: " << maxEdges << endl << endl;
+
+    GraphDB<int>* mastergraph;
+    mastergraph = new GraphDB<int>(numNodes, maxEdges);
+
+    for (int i = 0; i < numNodes; i++) {
+
+        cin >> nodeNum >> nodeInfo >> nodeYear >> nodeLocation;
+
+        tempNode.setNodeNumber(nodeNum);
+        tempNode.setNodeInfo(nodeInfo, nodeYear, nodeLocation);
+
+        mastergraph->setNode(tempNode);
+    }
+
+    cin >> input;  // read the next command from input
+
+    // while input is not end of file get next command 
+    while (!cin.eof()) {
+        // use switch cases to see the different commands to do next
+        switch (input) {
+
+            case 'I': { // insert edge
+                break;
+            }
+            case 'R': { // remove edge 
+                break;
+            }
+            case 'D': { // display the nodes and edges 
+
+                // loop through GraphDB nodes and display them
+                cout << "Displaying myNodes:" << endl;
+                for (int i = 0; i < numNodes; i++) {
+                    //cout << mastergraph->getNode(i);
+                    mastergraph->getNode(i)->display();
+                }
+
+                break;
+            }
+            case 'E': { // check existence of edges 
+                break;
+            }
+            case 'N': { // check existence of edges 
+                break;
+            }
+
+            default: cout << "No commands found";   // if no command found
+        }
+
+        cin >> input; // read the next command from input 
+    }
 
     return 0;
 }

@@ -48,7 +48,7 @@ Displaying myNodes:
 Displaying myEdges: 
 Harry - Ron friend, 4
 Harry - Hermoine friend, 4
-Harry - Malfoy villian, 3
+Harry - Malfoy villian, 4
 
 Inserting 3 5: villian, 60
 
@@ -74,7 +74,7 @@ Displaying myNodes:
 Displaying myEdges: 
 Harry - Ron friend, 4
 Harry - Hermoine friend, 4
-Harry - Malfoy villian, 3
+Harry - Malfoy villian, 4
 Dumbledoor - Malfoy villian, 60
 Ron - Hermoine married, 1
 Harry - Hagrid professor, 2
