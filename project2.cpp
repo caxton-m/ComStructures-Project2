@@ -115,19 +115,22 @@ public:
 
     // setters
     void setu(Node<DT>* newu) {
-
+        u = newu;
     }
     void setv(Node<DT>* newv) {
-
+        v = newv;
     }
     void setEdgeInfo(string newInfo, DT newYearsKnown) {
-
+        edgeInfo = newInfo;
+        setYearsKnown(newYearsKnown);
     } // V2: updated
     void setYearsKnown(DT newYear) {
-
+        yearsKnown = newYear;
     }                     // V2: updated
 
     void display(){ // display edge details
+        cout << u->getNodeInfo() << " - " << v->getNodeInfo() << " " << 
+            getEdgeInfo() << ", " << getYearsKnown() << endl;
     }
 
     ~Edge() {} // destructor
@@ -149,7 +152,6 @@ protected:
 
 public:
     GraphDB(int nNodes, int nEdges){ // non-default constructor
-        cout << "non-default constructor called" << endl;
         numNodes = nNodes;
         numEdges = 0;  // start numEdge at 0 and increase index as edges increase 
         maxEdges = nEdges;
@@ -168,6 +170,10 @@ public:
         
     }
     void setEdge(Edge<DT>& newEdge) {
+
+        // increase the numEdge index to go to the next one
+        numEdges++;
+
 
     }
     void setNodeInfo(int u, string newInfo) {
@@ -203,6 +209,17 @@ public:
 
     }
 
+    bool isANode(int nodex) {
+
+        for (int i = 0; i < numNodes; i++) {
+            if (myNodes[i].getNodeNumber() == nodex) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     ~GraphDB() {} // destructor
 };
 
@@ -215,9 +232,12 @@ int main()
     int numNodes, maxEdges;
     int nodeNum;
     int nodeYear;
+    int nodeU, nodeV;
+    int yearsKnown;
 
     string nodeInfo;
     string nodeLocation;
+    string edgeInfo;
 
     char input; // command to do something
 
@@ -251,6 +271,31 @@ int main()
         switch (input) {
 
             case 'I': { // insert edge
+
+                // read the node numbers and edge info
+                cin >> nodeU >> nodeV >> edgeInfo >> yearsKnown;
+                cout << "Inserting " << nodeU << " " << nodeV << ": " <<
+                    edgeInfo << ", " << yearsKnown << endl;
+
+                // check if NodeU and nodeV are a part of graphDB nodes
+                if ((mastergraph->isANode(nodeU) && mastergraph->isANode(nodeV)) == false) {
+
+                    // if node does not exist 
+                    cout << "Node not a part of the graph" << endl << endl;
+                    break;
+                }
+
+                // Set the tempEdge nodes to the GraphDB nodes with the same node numbers  
+                tempEdge.setu(mastergraph->getNode(nodeU));
+                tempEdge.setv(mastergraph->getNode(nodeV));
+
+                // Set the tempEdge info 
+                tempEdge.setEdgeInfo(edgeInfo, yearsKnown);
+
+                // store the address of this tempEdge to the GraphDB edges
+                mastergraph->setEdge(tempEdge);
+
+                cout << endl;
                 break;
             }
             case 'R': { // remove edge 
