@@ -174,13 +174,51 @@ public:
         // increase the numEdge index to go to the next one
         numEdges++;
 
+        if (numEdges >= maxEdges) {
 
+            // create a new temp array
+            Edge<DT>* temp = new Edge<DT>[maxEdges + (maxEdges / 2)]();
+
+            // copy old values - deep copy
+            for (int i = 0; i < maxEdges; i++) {
+                temp[i] = myEdges[i];
+            }
+
+            delete[] myEdges;  // delete the pointer to the old values
+            myEdges = temp;  // re point the pointer to the new memory location
+
+            maxEdges = maxEdges + (maxEdges / 2);  // update the value of maxEdges
+
+        }
+
+        // set GraphDB edge at numEdge index with node u, v and edge info
+        myEdges[numEdges - 1].setu(newEdge.getu());
+        myEdges[numEdges - 1].setv(newEdge.getv());
+        myEdges[numEdges - 1].setEdgeInfo(newEdge.getEdgeInfo(), newEdge.getYearsKnown());
     }
     void setNodeInfo(int u, string newInfo) {
+
+        // loop through the GraphDB nodes
+        for (int i = 0; i < numNodes; i++) {
+
+            // if the GraphDB node number is equal to u set new node info
+            if (myNodes[i].getNodeNumber() == u) {
+                myNodes[i].setNodeInfo(newInfo, myNodes[i].getYearCreated(), myNodes[i].getLocation());
+            }
+        }
 
     }
     void setEdgeInfo(int u, int v, string newInfo) {
 
+        // loop through the GraphDB edges
+        for (int i = 0; i < numEdges; i++) {
+
+            // If the edge u node number is equal to u and 
+            //    if the edge v node number is equal to v set new info
+            if (myEdges[i].getu()->getNodeNumber() == u && myEdges[i].getv()->getNodeNumber() == v) {
+                myEdges[i].setEdgeInfo(newInfo, myEdges[i].getYearsKnown());
+            }
+        }
     }
 
     // getters
@@ -188,28 +226,99 @@ public:
         return &myNodes[nodeNum];
     }
     string getNodeInfo(int nodeNum) {
+        return myNodes[nodeNum].getNodeInfo();
     }
     Edge<DT>* getEdgeInfo(int u, int v) {
+
+
+        // loop through the GraphDB edges 
+        for (int i = 0; i < numEdges; i++) {
+
+            // If the edge u node number is equal to u and 
+            //    if the edge v node number is equal to v return the edge.
+            if (myEdges[i].getu()->getNodeNumber() == u && myEdges[i].getv()->getNodeNumber() == v) {
+                return &myEdges[i];
+            }
+        }
+
+        // If edge is not found 
+        return NULL;
     }
 
     // operations
     bool isAnEdge(int u, int v){     // is this edge existent
 
+        // loop through the GraphDB edges
+        for (int i = 0; i < numEdges; i++) {
+
+            // If the edge u node number is equal to u and 
+            //    if the edge v node number is equal to v then edge exists
+            if (myEdges[i].getu()->getNodeNumber() == u && myEdges[i].getv()->getNodeNumber() == v) {
+
+                // print out message 
+                cout << "Edge exists between " << myEdges[i].getu()->getNodeInfo()
+                    << " and " << myEdges[i].getv()->getNodeInfo() << endl;
+
+                return true;  // return true when edge is found
+            }
+        }
+
+        // if edge is not in GraphDB edges it does not exist so print out message
+        cout << "No edge exists between " << myNodes[u].getNodeInfo()
+            << " and " << myNodes[v].getNodeInfo() << endl;
+
+        return false;  // return false when edge not found
     }
     void addEdge(Edge<DT>& newEdge){ // add an edge
-
+        
     }
     void deleteEdge(int u, int v){   // delete the edge
 
+        // check if the edge is existent
+        if (isAnEdge(u, v)){
+
+            int ind = -1; // temp index to store where index of edge is in the GraphDB
+
+            // loop through the GraphDB edges
+            for (int i = 0; i < numEdges; i++) {
+
+                // break loop when index with deleted edge is found and store index in ind
+                if (myEdges[i].getu()->getNodeNumber() == u && myEdges[i].getv()->getNodeNumber() == v) {
+                    ind = i;
+                    break;
+                }
+            }
+
+            // loop through the GraphDB edges starting from deleted edge index
+            for (int j = ind; j < numEdges - 1; j++)
+            {
+                myEdges[j] = myEdges[j + 1]; // make the current index edge the next edge from GraphDB edges
+            }
+
+            // remove the last index of GraphDB edges by setting to constructor values
+            myEdges[numEdges - 1].setu(NULL);
+            myEdges[numEdges - 1].setv(NULL);
+            myEdges[numEdges - 1].setEdgeInfo("", NULL);
+
+            // decrease the numEdge index since the number of Edges is one less
+            numEdges--;
+        }
+
+        else{
+            cout << "Edge does not exist to be deleted" << endl; // this could be an exception
+        }
     }
     void display(){                  // display the contents of the two arrays
-
+        // loop through the GraphDB edges and display them
+        for (int i = 0; i < numEdges; i++) {
+            myEdges[i].display();
+        }
     }
     int* findNeighbours(int u){      // returns an integer array of neighbours' nodeNum
 
     }
 
-    bool isANode(int nodex) {
+    bool isANode(int nodex) {  // should be a try catch ....*****
 
         for (int i = 0; i < numNodes; i++) {
             if (myNodes[i].getNodeNumber() == nodex) {
@@ -299,6 +408,15 @@ int main()
                 break;
             }
             case 'R': { // remove edge 
+
+                // read the node numbers to be removed
+                cin >> nodeU >> nodeV;
+                cout << "Removing " << nodeU << " " << nodeV << endl;
+
+                // remove the edge from the GraphDB byy calling function
+                mastergraph->deleteEdge(nodeU, nodeV);
+
+                cout << endl;
                 break;
             }
             case 'D': { // display the nodes and edges 
@@ -310,9 +428,22 @@ int main()
                     mastergraph->getNode(i)->display();
                 }
 
+                // loop through GraphDB edges and display them
+                cout << "Displaying myEdges:" << endl;
+                mastergraph->display();
+                cout << endl;
+
                 break;
             }
             case 'E': { // check existence of edges 
+
+                // read the node numbers to be checked for edge existence
+                cin >> nodeU >> nodeV;
+
+                // loop through GraphDB edges to see edge existence calling function
+                mastergraph->isAnEdge(nodeU, nodeV);
+
+                cout << endl;
                 break;
             }
             case 'N': { // check existence of edges 
