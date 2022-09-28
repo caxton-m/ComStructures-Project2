@@ -255,17 +255,9 @@ public:
             //    if the edge v node number is equal to v then edge exists
             if (myEdges[i].getu()->getNodeNumber() == u && myEdges[i].getv()->getNodeNumber() == v) {
 
-                // print out message 
-                cout << "Edge exists between " << myEdges[i].getu()->getNodeInfo()
-                    << " and " << myEdges[i].getv()->getNodeInfo() << endl;
-
                 return true;  // return true when edge is found
             }
         }
-
-        // if edge is not in GraphDB edges it does not exist so print out message
-        cout << "No edge exists between " << myNodes[u].getNodeInfo()
-            << " and " << myNodes[v].getNodeInfo() << endl;
 
         return false;  // return false when edge not found
     }
@@ -302,6 +294,23 @@ public:
 
             // decrease the numEdge index since the number of Edges is one less
             numEdges--;
+
+            // deallocating memory
+            if (numEdges < (maxEdges / 2)) {
+
+                // create a new temp array
+                Edge<DT>* temp = new Edge<DT>[maxEdges / 2]();
+
+                // copy old values - deep copy
+                for (int i = 0; i < (maxEdges / 2); i++) {
+                    temp[i] = myEdges[i];
+                }
+
+                delete[] myEdges;  // delete the pointer to the old values
+                myEdges = temp;  // re point the pointer to the new memory location
+
+                maxEdges = maxEdges / 2;  // update the value of maxEdges
+            }
         }
 
         else{
@@ -315,7 +324,34 @@ public:
         }
     }
     int* findNeighbours(int u){      // returns an integer array of neighbours' nodeNum
+        int neighbourSize = 1;
+        int newSize = 1;
+        int* neighbours = new int[neighbourSize]();
 
+        for (int i = 0; i < numNodes; i++) {
+           
+            if (isAnEdge(myNodes[i].getNodeNumber(), u) || isAnEdge(u, myNodes[i].getNodeNumber())) {
+
+                if (newSize > neighbourSize) {
+                    int* tempNeighbours = new int[newSize]();
+
+                    for (int j = 0; j < neighbourSize; j++) // copy old values - deep copy
+                        tempNeighbours[j] = neighbours[j];
+
+                    delete [] neighbours;
+
+                    neighbours = tempNeighbours;
+
+                    neighbourSize = newSize;
+                }
+
+                neighbours[neighbourSize - 1] = myNodes[i].getNodeNumber();
+                newSize++;
+                
+            }
+        }
+
+        return neighbours;
     }
 
     bool isANode(int nodex) {  // should be a try catch ....*****
@@ -343,12 +379,16 @@ int main()
     int nodeYear;
     int nodeU, nodeV;
     int yearsKnown;
+    int nodeNeighbour;
+    int* neighbours;
+    int neighbourSize;
 
     string nodeInfo;
     string nodeLocation;
     string edgeInfo;
 
     char input; // command to do something
+    bool edgeExistence; // 
 
     Node<int> tempNode; // temp node for node insertion 
     Edge<int> tempEdge; // temp edge for edge insertion
@@ -440,13 +480,35 @@ int main()
                 // read the node numbers to be checked for edge existence
                 cin >> nodeU >> nodeV;
 
-                // loop through GraphDB edges to see edge existence calling function
-                mastergraph->isAnEdge(nodeU, nodeV);
+                edgeExistence = mastergraph->isAnEdge(nodeU, nodeV);
+
+                if (edgeExistence == true)
+                    // print out message 
+                    cout << "Edge exists between " << mastergraph->getNode(nodeU)->getNodeInfo()
+                        << " and " << mastergraph->getNode(nodeV)->getNodeInfo() << endl;
+                else
+                    // if edge is not in GraphDB edges it does not exist so print out message
+                    cout << "No edge exists between " << mastergraph->getNode(nodeU)->getNodeInfo()
+                    << " and " << mastergraph->getNode(nodeV)->getNodeInfo() << endl;
 
                 cout << endl;
                 break;
             }
             case 'N': { // check existence of edges 
+                
+                // read the node number to be checked for neighbours
+                cin >> nodeNeighbour; 
+
+                // check the neighbours of the nodeNum
+                neighbours = mastergraph->findNeighbours(nodeNeighbour);
+                neighbourSize = (sizeof(neighbours) / sizeof(*neighbours)) - 1;
+
+                cout << "Neighbours of " << nodeNeighbour << ": ";
+
+                for (int i = 0; i < neighbourSize; i++) {
+                    cout << neighbours[i] << " ";
+                }
+                cout << endl << endl;
                 break;
             }
 
