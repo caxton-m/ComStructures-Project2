@@ -13,7 +13,6 @@ using namespace std;
 template <class DT>
 class Node
 {
-    friend ostream& operator<< (ostream& s, const Node<DT>& N);
 protected:
     int nodeNumber;  // field to store node's number
     string nodeInfo; // field to store node's information
@@ -49,9 +48,6 @@ public:
         setYearCreated(newYearCreated);
         setLocation(newLoc);
 
-        //yearCreated = newYearCreated;
-        //location = newLoc;
-
     } // V2: updated
     void setNodeNumber(int newNum) {
         nodeNumber = newNum;
@@ -70,15 +66,6 @@ public:
 
     ~Node() {} // destructor
 };
-
-template <class DT>
-ostream& operator<<(ostream& s, const Node<DT>& N)
-{
-    
-    s << *(N.nodeNumber) << ": " << *(N.nodeInfo) << ", " << *(N.yearCreated) <<
-        ", " << *(N.location) << endl;
-    return s;
-}
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -133,7 +120,10 @@ public:
             getEdgeInfo() << ", " << getYearsKnown() << endl;
     }
 
-    ~Edge() {} // destructor
+    ~Edge() {
+        //if (u != NULL) delete [] u;
+        //if (v != NULL) delete [] v;
+    } // destructor
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -143,6 +133,22 @@ template <class DT>
 class GraphDB
 {
     // TODO: ostream operator for displaying myNodes and myEdges
+    friend ostream& operator<< (ostream& s, const GraphDB<DT>& G) {
+
+        // loop through GraphDB nodes and display them
+        s << "Displaying myNodes:" << endl;
+        for (int i = 0; i < numNodes; i++) {
+            *(G.myNodes[i].display());
+        }
+
+        // loop through GraphDB edges and display them
+        s << "Displaying myEdges:" << endl;
+        for (int i = 0; i < numEdges; i++) {
+            *(G.myEdges[i].display());
+        }
+
+        return s;
+    }
 protected:
     Node<DT>* myNodes; // array of nodes
     Edge<DT>* myEdges; // array of edges
@@ -320,6 +326,7 @@ public:
     void display(){                  // display the contents of the two arrays
         // loop through the GraphDB edges and display them
         for (int i = 0; i < numEdges; i++) {
+            //cout << myEdges[i];
             myEdges[i].display();
         }
     }
@@ -365,7 +372,10 @@ public:
         return false;
     }
 
-    ~GraphDB() {} // destructor
+    ~GraphDB() {
+        //if (myNodes != NULL) delete [] myNodes;
+        //if (myEdges != NULL) delete [] myEdges;
+    } // destructor
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -388,7 +398,8 @@ int main()
     string edgeInfo;
 
     char input; // command to do something
-    bool edgeExistence; // 
+    bool edgeExistence; //
+    bool nodeExistence;
 
     Node<int> tempNode; // temp node for node insertion 
     Edge<int> tempEdge; // temp edge for edge insertion
@@ -427,8 +438,21 @@ int main()
                     edgeInfo << ", " << yearsKnown << endl;
 
                 // check if NodeU and nodeV are a part of graphDB nodes
-                if ((mastergraph->isANode(nodeU) && mastergraph->isANode(nodeV)) == false) {
+                //if ((mastergraph->isANode(nodeU) && mastergraph->isANode(nodeV)) == false) {
 
+                //    // if node does not exist 
+                //    cout << "Node not a part of the graph" << endl << endl;
+                //    break;
+                //}
+
+                // check if NodeU and nodeV are a part of graphDB nodes
+                nodeExistence = (mastergraph->isANode(nodeU) && mastergraph->isANode(nodeV));
+
+                try {
+                    if (nodeExistence == false) throw nodeExistence;
+
+                }
+                catch (bool nodeExistence) {
                     // if node does not exist 
                     cout << "Node not a part of the graph" << endl << endl;
                     break;
@@ -471,6 +495,8 @@ int main()
                 // loop through GraphDB edges and display them
                 cout << "Displaying myEdges:" << endl;
                 mastergraph->display();
+
+                //cout << (&mastergraph);
                 cout << endl;
 
                 break;
