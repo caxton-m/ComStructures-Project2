@@ -23,7 +23,7 @@ public:
     Node() {  // default constructor
         nodeNumber = 0;
         nodeInfo = "";
-        yearCreated = NULL;
+        yearCreated = -1;
         location = "";
     } 
 
@@ -84,7 +84,7 @@ public:
         u = NULL;
         v = NULL;
         edgeInfo = "";
-        yearsKnown = NULL;
+        yearsKnown = -1;
     }
     // getters
     Node<DT>* getu() {
@@ -132,19 +132,19 @@ public:
 template <class DT>
 class GraphDB
 {
-    // TODO: ostream operator for displaying myNodes and myEdges
-    friend ostream& operator<< (ostream& s, const GraphDB<DT>& G) {
+    // ostream operator for displaying myNodes and myEdges
+    friend ostream& operator<< (ostream& s, const GraphDB<int>& G) {
 
         // loop through GraphDB nodes and display them
         s << "Displaying myNodes:" << endl;
-        for (int i = 0; i < numNodes; i++) {
-            *(G.myNodes[i].display());
+        for (int i = 0; i < G.numNodes; i++) {
+            (G.myNodes[i].display());
         }
 
         // loop through GraphDB edges and display them
         s << "Displaying myEdges:" << endl;
-        for (int i = 0; i < numEdges; i++) {
-            *(G.myEdges[i].display());
+        for (int i = 0; i < G.numEdges; i++) {
+            (G.myEdges[i].display());
         }
 
         return s;
@@ -296,7 +296,7 @@ public:
             // remove the last index of GraphDB edges by setting to constructor values
             myEdges[numEdges - 1].setu(NULL);
             myEdges[numEdges - 1].setv(NULL);
-            myEdges[numEdges - 1].setEdgeInfo("", NULL);
+            myEdges[numEdges - 1].setEdgeInfo("", -1);
 
             // decrease the numEdge index since the number of Edges is one less
             numEdges--;
@@ -331,29 +331,20 @@ public:
         }
     }
     int* findNeighbours(int u){      // returns an integer array of neighbours' nodeNum
-        int neighbourSize = 1;
-        int newSize = 1;
-        int* neighbours = new int[neighbourSize]();
+
+        int* neighbours = new int[numNodes - 1]();
+        int index = 0;
+
+        for (int i = 0; i < (numNodes - 1); i++) {
+            neighbours[i] = -1;
+        }
 
         for (int i = 0; i < numNodes; i++) {
            
             if (isAnEdge(myNodes[i].getNodeNumber(), u) || isAnEdge(u, myNodes[i].getNodeNumber())) {
 
-                if (newSize > neighbourSize) {
-                    int* tempNeighbours = new int[newSize]();
-
-                    for (int j = 0; j < neighbourSize; j++) // copy old values - deep copy
-                        tempNeighbours[j] = neighbours[j];
-
-                    delete [] neighbours;
-
-                    neighbours = tempNeighbours;
-
-                    neighbourSize = newSize;
-                }
-
-                neighbours[neighbourSize - 1] = myNodes[i].getNodeNumber();
-                newSize++;
+                neighbours[index] = myNodes[i].getNodeNumber();
+                index++;
                 
             }
         }
@@ -391,7 +382,6 @@ int main()
     int yearsKnown;
     int nodeNeighbour;
     int* neighbours;
-    int neighbourSize;
 
     string nodeInfo;
     string nodeLocation;
@@ -438,17 +428,10 @@ int main()
                     edgeInfo << ", " << yearsKnown << endl;
 
                 // check if NodeU and nodeV are a part of graphDB nodes
-                //if ((mastergraph->isANode(nodeU) && mastergraph->isANode(nodeV)) == false) {
-
-                //    // if node does not exist 
-                //    cout << "Node not a part of the graph" << endl << endl;
-                //    break;
-                //}
-
-                // check if NodeU and nodeV are a part of graphDB nodes
                 nodeExistence = (mastergraph->isANode(nodeU) && mastergraph->isANode(nodeV));
 
                 try {
+                    // if nodes not part of graphDB throw error message
                     if (nodeExistence == false) throw nodeExistence;
 
                 }
@@ -485,18 +468,8 @@ int main()
             }
             case 'D': { // display the nodes and edges 
 
-                // loop through GraphDB nodes and display them
-                cout << "Displaying myNodes:" << endl;
-                for (int i = 0; i < numNodes; i++) {
-                    //cout << mastergraph->getNode(i);
-                    mastergraph->getNode(i)->display();
-                }
-
-                // loop through GraphDB edges and display them
-                cout << "Displaying myEdges:" << endl;
-                mastergraph->display();
-
-                //cout << (&mastergraph);
+                // loop through GraphDB nodes and Edges and display them
+                cout << (*mastergraph);
                 cout << endl;
 
                 break;
@@ -527,13 +500,15 @@ int main()
 
                 // check the neighbours of the nodeNum
                 neighbours = mastergraph->findNeighbours(nodeNeighbour);
-                neighbourSize = (sizeof(neighbours) / sizeof(*neighbours)) - 1;
 
                 cout << "Neighbours of " << nodeNeighbour << ": ";
 
-                for (int i = 0; i < neighbourSize; i++) {
+                // print of the neighbours of the nodeNum
+                for (int i = 0; i < numNodes - 1; i++) {
+                    if (neighbours[i] == -1) break;
                     cout << neighbours[i] << " ";
                 }
+
                 cout << endl << endl;
                 break;
             }
