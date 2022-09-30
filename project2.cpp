@@ -141,19 +141,20 @@ template <class DT>
 class GraphDB
 {
     // ostream operator for displaying myNodes and myEdges
-    friend ostream& operator<< (ostream& s, const GraphDB<int>& G) {
+    friend ostream& operator<< (ostream& s, GraphDB<int>& G) {
 
         // loop through GraphDB nodes and display them
         s << "Displaying myNodes:" << endl;
-        for (int i = 0; i < G.numNodes; i++) {
-            //G.getNode(i)->display();
-            (G.myNodes[i].display());
+        for (int i = 0; i < G.getnumNodes(); i++) {
+            G.getNode(i)->display();
+            //(G.myNodes[i].display());
         }
 
         // loop through GraphDB edges and display them
         s << "Displaying myEdges:" << endl;
-        for (int i = 0; i < G.numEdges; i++) {
-            (G.myEdges[i].display());
+        for (int i = 0; i < G.getnumEdges(); i++) {
+            G.getEdge(i)->display();
+            //(G.myEdges[i].display());
         }
 
         return s;
@@ -257,6 +258,15 @@ public:
 
         // If edge is not found 
         return NULL;
+    }
+    Edge<DT>* getEdge(int edgeIndex) {
+        return &myEdges[edgeIndex];
+    }
+    int getnumNodes() {
+        return numNodes;
+    }
+    int getnumEdges() {
+        return numEdges;
     }
 
     // operations
