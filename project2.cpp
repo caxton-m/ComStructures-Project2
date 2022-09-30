@@ -59,12 +59,16 @@ public:
         location = newLocation;
     }
 
-    void display() {
+    // display node details
+    void display() { 
         cout << getNodeNumber() << ": " << getNodeInfo() << ", " << getYearCreated() <<
             ", " << getLocation() << endl;
-    } // display node details
+    } 
 
-    ~Node() {} // destructor
+    // destructor
+    ~Node() {
+        //cout << "Node Destructor" << endl;
+    }
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -86,6 +90,7 @@ public:
         edgeInfo = "";
         yearsKnown = -1;
     }
+
     // getters
     Node<DT>* getu() {
         return u;
@@ -113,17 +118,20 @@ public:
     } // V2: updated
     void setYearsKnown(DT newYear) {
         yearsKnown = newYear;
-    }                     // V2: updated
+    } // V2: updated
 
-    void display(){ // display edge details
+    // display edge details
+    void display(){ 
         cout << u->getNodeInfo() << " - " << v->getNodeInfo() << " " << 
             getEdgeInfo() << ", " << getYearsKnown() << endl;
     }
 
+    // destructor
     ~Edge() {
         //if (u != NULL) delete [] u;
         //if (v != NULL) delete [] v;
-    } // destructor
+        //cout << "Edge Destructor" << endl;
+    }
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -138,6 +146,7 @@ class GraphDB
         // loop through GraphDB nodes and display them
         s << "Displaying myNodes:" << endl;
         for (int i = 0; i < G.numNodes; i++) {
+            //G.getNode(i)->display();
             (G.myNodes[i].display());
         }
 
@@ -191,7 +200,7 @@ public:
             }
 
             delete[] myEdges;  // delete the pointer to the old values
-            myEdges = temp;  // re point the pointer to the new memory location
+            myEdges = temp;    // re point the pointer to the new memory location
 
             maxEdges = maxEdges + (maxEdges / 2);  // update the value of maxEdges
 
@@ -220,7 +229,7 @@ public:
         for (int i = 0; i < numEdges; i++) {
 
             // If the edge u node number is equal to u and 
-            //    if the edge v node number is equal to v set new info
+            //    if the edge v node number is equal to v set new info with years known
             if (myEdges[i].getu()->getNodeNumber() == u && myEdges[i].getv()->getNodeNumber() == v) {
                 myEdges[i].setEdgeInfo(newInfo, myEdges[i].getYearsKnown());
             }
@@ -235,7 +244,6 @@ public:
         return myNodes[nodeNum].getNodeInfo();
     }
     Edge<DT>* getEdgeInfo(int u, int v) {
-
 
         // loop through the GraphDB edges 
         for (int i = 0; i < numEdges; i++) {
@@ -265,9 +273,34 @@ public:
             }
         }
 
-        return false;  // return false when edge not found
+        return false;         // return false when edge not found
     }
     void addEdge(Edge<DT>& newEdge){ // add an edge
+
+        // increase the numEdge index to go to the next one
+        numEdges++;
+
+        if (numEdges >= maxEdges) {
+
+            // create a new temp array
+            Edge<DT>* temp = new Edge<DT>[maxEdges + (maxEdges / 2)]();
+
+            // copy old values - deep copy
+            for (int i = 0; i < maxEdges; i++) {
+                temp[i] = myEdges[i];
+            }
+
+            delete[] myEdges;  // delete the pointer to the old values
+            myEdges = temp;    // re point the pointer to the new memory location
+
+            maxEdges = maxEdges + (maxEdges / 2);  // update the value of maxEdges
+
+        }
+
+        // set GraphDB edge at numEdge index with node u, v and edge info
+        myEdges[numEdges - 1].setu(newEdge.getu());
+        myEdges[numEdges - 1].setv(newEdge.getv());
+        myEdges[numEdges - 1].setEdgeInfo(newEdge.getEdgeInfo(), newEdge.getYearsKnown());
         
     }
     void deleteEdge(int u, int v){   // delete the edge
@@ -301,7 +334,8 @@ public:
             // decrease the numEdge index since the number of Edges is one less
             numEdges--;
 
-            // deallocating memory
+            // ----- deallocating memory -------
+            // if the numEdges is less than the half the maxEdges array
             if (numEdges < (maxEdges / 2)) {
 
                 // create a new temp array
@@ -313,9 +347,9 @@ public:
                 }
 
                 delete[] myEdges;  // delete the pointer to the old values
-                myEdges = temp;  // re point the pointer to the new memory location
+                myEdges = temp;    // re point the pointer to the new memory location
 
-                maxEdges = maxEdges / 2;  // update the value of maxEdges
+                maxEdges = maxEdges / 2;  // update the value of maxEdges to half the size
             }
         }
 
@@ -323,93 +357,105 @@ public:
             cout << "Edge does not exist to be deleted" << endl; // this could be an exception
         }
     }
-    void display(){                  // display the contents of the two arrays
+    void display(){ // display the contents of the two arrays
+
         // loop through the GraphDB edges and display them
         for (int i = 0; i < numEdges; i++) {
-            //cout << myEdges[i];
             myEdges[i].display();
         }
     }
     int* findNeighbours(int u){      // returns an integer array of neighbours' nodeNum
 
-        int* neighbours = new int[numNodes - 1]();
-        int index = 0;
+        int* neighbours = new int[numNodes - 1]();  // make array to store neighbours
+        int index = 0;                              // variable for index of neighbour array
 
+        // initialize all the elements in neighbours array to -1
         for (int i = 0; i < (numNodes - 1); i++) {
             neighbours[i] = -1;
         }
 
+        // loop the DB nodes 
         for (int i = 0; i < numNodes; i++) {
            
+            // if there exists an edge between the nodeNum and another node in grapgDB nodes add 
+            //    as a neighbour to nodeNum
             if (isAnEdge(myNodes[i].getNodeNumber(), u) || isAnEdge(u, myNodes[i].getNodeNumber())) {
 
+                // add index of node as neighbour 
                 neighbours[index] = myNodes[i].getNodeNumber();
-                index++;
+                index++;        // go to the next index
                 
             }
         }
 
-        return neighbours;
+        return neighbours;      // return the array of neighbours
     }
 
-    bool isANode(int nodex) {  // should be a try catch ....*****
+    bool isANode(int nodex) {  // return true or false value if node exists
 
+        // loop the the graph DB nodes
         for (int i = 0; i < numNodes; i++) {
+
+            // if node is found return a true value 
             if (myNodes[i].getNodeNumber() == nodex) {
                 return true;
             }
         }
 
-        return false;
+        return false;  // if node not found
     }
 
-    ~GraphDB() {
+    // destructor
+    ~GraphDB() {   
         //if (myNodes != NULL) delete [] myNodes;
         //if (myEdges != NULL) delete [] myEdges;
-    } // destructor
+        //cout << "GraphDB Destructor" << endl;
+    }
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 int main()
 {
+    int numNodes, maxEdges;    // temp variable to store numNodes and maxEdges from input
+    int nodeNum;               // index of node
+    int nodeYear;              // node year created
+    int nodeU, nodeV;          // temp variable to store 1st and 2nd node index
+    int yearsKnown;            // variable to store years known 
+    int nodeNeighbour;         // node to check neighbours 
+    int* neighbours;           // array to store neighbour of nodeNeighbours
 
-    // you can start with the same main function from project 1
-    int numNodes, maxEdges;
-    int nodeNum;
-    int nodeYear;
-    int nodeU, nodeV;
-    int yearsKnown;
-    int nodeNeighbour;
-    int* neighbours;
+    string nodeInfo;           // names or infomation of nodes
+    string nodeLocation;       // location of nodes
+    string edgeInfo;           // temp variable to store edge information
 
-    string nodeInfo;
-    string nodeLocation;
-    string edgeInfo;
+    char input;                // command to do something
+    bool edgeExistence;        // variable to store edge existent 
+    bool nodeExistence;        // variable to store node existent 
 
-    char input; // command to do something
-    bool edgeExistence; //
-    bool nodeExistence;
+    Node<int> tempNode;        // temp node for node insertion 
+    Edge<int> tempEdge;        // temp edge for edge insertion
+    GraphDB<int>* mastergraph; // pointer object of GraphDB class
 
-    Node<int> tempNode; // temp node for node insertion 
-    Edge<int> tempEdge; // temp edge for edge insertion
-
-    cin >> numNodes >> maxEdges;
+    cin >> numNodes >> maxEdges;  // read the numNodes and maxEdges from redirected input
 
     // display the values read in
     cout << "numNodes: " << numNodes << endl;
     cout << "maxEdges: " << maxEdges << endl << endl;
 
-    GraphDB<int>* mastergraph;
+    // allocate memory by calling non-default constructor
     mastergraph = new GraphDB<int>(numNodes, maxEdges);
 
+    // input nodes
     for (int i = 0; i < numNodes; i++) {
 
-        cin >> nodeNum >> nodeInfo >> nodeYear >> nodeLocation;
+        cin >> nodeNum >> nodeInfo >> nodeYear >> nodeLocation; // read in the node info
 
+        // Set the node number and info to temp node
         tempNode.setNodeNumber(nodeNum);
         tempNode.setNodeInfo(nodeInfo, nodeYear, nodeLocation);
 
+        // store the address of this node to the GraphDB nodes
         mastergraph->setNode(tempNode);
     }
 
@@ -468,7 +514,7 @@ int main()
             }
             case 'D': { // display the nodes and edges 
 
-                // loop through GraphDB nodes and Edges and display them
+                // loop through GraphDB nodes and edges and display them
                 cout << (*mastergraph);
                 cout << endl;
 
@@ -519,5 +565,5 @@ int main()
         cin >> input; // read the next command from input 
     }
 
-    return 0;
+     return 0;
 }
